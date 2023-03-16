@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"sort"
 	"strings"
@@ -36,7 +38,7 @@ var COMMAND string = fmt.Sprintf("%s --query-gpu=%s --format=%s", BASE_COMMAND, 
 
 func main() {
 	// Get remote servers.
-	servers := GetRemoveServers()
+	servers, _ := GetRemoteServers()
 	info := make(chan ServerInfo, len(servers))
 
 	// Get info from remote servers.
@@ -56,17 +58,20 @@ func main() {
 }
 
 func CreateOutput(servers []ServerInfo) table.Table {
-	headerFmt := color.New(color.FgGreen, color.Bold, color.Underline).SprintfFunc()
-	columnFmt := color.New(color.FgYellow).SprintfFunc()
+	headerFmt := color.New(color.FgWhite, color.Bold, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgHiBlue).SprintfFunc()
 
-	tbl := table.New("Server", "Name", "Index", "Total Memory", "Used Memory", "Free Memory")
+	tbl := table.New("Server", "Name", "Index", "Free Memory", "Used Memory", "Total Memory")
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, server := range servers {
+		if len(server.GPU) == 0 {
+			continue
+		}
 		gpu := server.GPU[0]
-		tbl.AddRow(server.Name, gpu.Name, gpu.Index, gpu.TotalMemory, gpu.UsedMemory, gpu.FreeMemory)
+		tbl.AddRow(server.Name, gpu.Name, gpu.Index, gpu.FreeMemory, gpu.UsedMemory, gpu.TotalMemory)
 		for _, gpu := range server.GPU[1:] {
-			tbl.AddRow("", gpu.Name, gpu.Index, gpu.TotalMemory, gpu.UsedMemory, gpu.FreeMemory)
+			tbl.AddRow("", gpu.Name, gpu.Index, gpu.FreeMemory, gpu.UsedMemory, gpu.TotalMemory)
 		}
 	}
 
@@ -99,8 +104,32 @@ func GetGPUInfo(server string, command string, info chan ServerInfo, wg *sync.Wa
 	info <- ServerInfo{Name: server, Result: out.String()}
 }
 
-func GetRemoveServers() []string {
-	return []string{"jadranka", "adriana", "tuga", "buga", "snjezana", "suncica"}
+func GetRemoteServers() ([]string, error) {
+	filename := os.Getenv("HOME") + "/.ssh/config"
+
+	// Open the SSH config file.
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// Read the hosts.
+	var hosts []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "Host ") {
+			hosts = append(hosts, strings.TrimSpace(strings.TrimPrefix(line, "Host ")))
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return hosts, nil
+
 }
 
 func ExtractGPUInfo(info string) []GPUInfo {
