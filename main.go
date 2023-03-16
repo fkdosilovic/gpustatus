@@ -55,19 +55,17 @@ func main() {
 }
 
 func FormatOutput(servers []ServerInfo) {
-	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	headerFmt := color.New(color.FgGreen, color.Bold, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgYellow).SprintfFunc()
 
 	tbl := table.New("Server", "Name", "Index", "Total Memory", "Used Memory", "Free Memory")
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, server := range servers {
-		for i, gpu := range server.GPU {
-			if i == 0 {
-				tbl.AddRow(server.Name, gpu.Name, gpu.Index, gpu.TotalMemory, gpu.UsedMemory, gpu.FreeMemory)
-			} else {
-				tbl.AddRow("", gpu.Name, gpu.Index, gpu.TotalMemory, gpu.UsedMemory, gpu.FreeMemory)
-			}
+		gpu := server.GPU[0]
+		tbl.AddRow(server.Name, gpu.Name, gpu.Index, gpu.TotalMemory, gpu.UsedMemory, gpu.FreeMemory)
+		for _, gpu := range server.GPU[1:] {
+			tbl.AddRow("", gpu.Name, gpu.Index, gpu.TotalMemory, gpu.UsedMemory, gpu.FreeMemory)
 		}
 	}
 
