@@ -51,10 +51,11 @@ func main() {
 	})
 
 	// Print info.
-	FormatOutput(serverInfo)
+	tbl := CreateOutput(serverInfo)
+	tbl.Print()
 }
 
-func FormatOutput(servers []ServerInfo) {
+func CreateOutput(servers []ServerInfo) table.Table {
 	headerFmt := color.New(color.FgGreen, color.Bold, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgYellow).SprintfFunc()
 
@@ -69,7 +70,7 @@ func FormatOutput(servers []ServerInfo) {
 		}
 	}
 
-	tbl.Print()
+	return tbl
 }
 
 // Get info from remote servers.
