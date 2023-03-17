@@ -1,0 +1,1 @@
+mv gpuinfo $HOME/.local/bin/gpuinfo
