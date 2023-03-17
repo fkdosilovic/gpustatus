@@ -14,23 +14,23 @@ import (
 	"github.com/rodaine/table"
 )
 
-type GPUInfo struct {
+type GPU struct {
 	Name        string
 	Index       string
-	TotalMemory string
 	FreeMemory  string
 	UsedMemory  string
+	TotalMemory string
 }
 
-type ServerInfo struct {
-	Name   string
-	Result string
-	GPU    []GPUInfo
+type Server struct {
+	Name    string
+	Result  string
+	Devices []GPU
 }
 
 const (
 	BASE_COMMAND   = "nvidia-smi"
-	DEFAULT_QUERY  = "name,index,memory.total,memory.free,memory.used"
+	DEFAULT_QUERY  = "name,index,memory.free,memory.used,memory.total"
 	DEFAULT_FORMAT = "csv"
 )
 
@@ -39,7 +39,7 @@ var COMMAND string = fmt.Sprintf("%s --query-gpu=%s --format=%s", BASE_COMMAND, 
 func main() {
 	// Get remote servers.
 	servers, _ := GetRemoteServers()
-	info := make(chan ServerInfo, len(servers))
+	info := make(chan Server, len(servers))
 
 	// Get info from remote servers.
 	GetGPUInfoFromServers(servers, info)
@@ -57,7 +57,7 @@ func main() {
 	tbl.Print()
 }
 
-func CreateOutput(servers []ServerInfo) table.Table {
+func CreateOutput(servers []Server) table.Table {
 	headerFmt := color.New(color.FgWhite, color.Bold, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgHiBlue).SprintfFunc()
 
@@ -65,12 +65,13 @@ func CreateOutput(servers []ServerInfo) table.Table {
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, server := range servers {
-		if len(server.GPU) == 0 {
+		if len(server.Devices) == 0 {
 			continue
 		}
-		gpu := server.GPU[0]
+
+		gpu := server.Devices[0]
 		tbl.AddRow(server.Name, gpu.Name, gpu.Index, gpu.FreeMemory, gpu.UsedMemory, gpu.TotalMemory)
-		for _, gpu := range server.GPU[1:] {
+		for _, gpu := range server.Devices[1:] {
 			tbl.AddRow("", gpu.Name, gpu.Index, gpu.FreeMemory, gpu.UsedMemory, gpu.TotalMemory)
 		}
 	}
@@ -79,7 +80,7 @@ func CreateOutput(servers []ServerInfo) table.Table {
 }
 
 // Get info from remote servers.
-func GetGPUInfoFromServers(servers []string, info chan ServerInfo) {
+func GetGPUInfoFromServers(servers []string, info chan Server) {
 	var wg sync.WaitGroup
 
 	wg.Add(len(servers))
@@ -90,18 +91,18 @@ func GetGPUInfoFromServers(servers []string, info chan ServerInfo) {
 }
 
 // Run command on remote machine and return the output.
-func GetGPUInfo(server string, command string, info chan ServerInfo, wg *sync.WaitGroup) {
+func GetGPUInfo(server string, command string, info chan Server, wg *sync.WaitGroup) {
 	defer wg.Done()
 	cmd := exec.Command("ssh", server, command)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
-		info <- ServerInfo{Name: server, Result: ""}
+		info <- Server{Name: server, Result: ""}
 		return
 	}
 
-	info <- ServerInfo{Name: server, Result: out.String()}
+	info <- Server{Name: server, Result: out.String()}
 }
 
 func GetRemoteServers() ([]string, error) {
@@ -132,35 +133,32 @@ func GetRemoteServers() ([]string, error) {
 
 }
 
-func ExtractGPUInfo(info string) []GPUInfo {
-	var gpuInfo []GPUInfo
+func ExtractGPUInfo(info string) []GPU {
+	var devices []GPU
 
 	lines := strings.Split(info, "\n")
 	for _, ln := range lines[1:] {
 		fields := strings.Split(ln, ",")
-		gpuInfo = append(gpuInfo, GPUInfo{
+		devices = append(devices, GPU{
 			Name:        fields[0],
 			Index:       fields[1],
-			TotalMemory: fields[2],
-			FreeMemory:  fields[3],
-			UsedMemory:  fields[4],
+			FreeMemory:  fields[2],
+			UsedMemory:  fields[3],
+			TotalMemory: fields[4],
 		})
 	}
 
-	return gpuInfo
+	return devices
 }
 
 // Process info from remote servers.
-func ProcessGPUInfo(info <-chan ServerInfo) []ServerInfo {
-	var serverInfo []ServerInfo
+func ProcessGPUInfo(info <-chan Server) []Server {
+	var serverInfo []Server
 
-	// Populate the serverInfo slice.
 	for len(info) > 0 {
-		serverInfo = append(serverInfo, <-info)
-	}
-
-	for i, server := range serverInfo {
-		serverInfo[i].GPU = ExtractGPUInfo(strings.TrimSpace(server.Result))
+		server := <-info
+		server.Devices = ExtractGPUInfo(strings.TrimSpace(server.Result))
+		serverInfo = append(serverInfo, server)
 	}
 
 	return serverInfo
