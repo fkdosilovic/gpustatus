@@ -65,14 +65,10 @@ func CreateOutput(servers []Server) table.Table {
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, server := range servers {
-		if len(server.Devices) == 0 {
-			continue
-		}
-
-		gpu := server.Devices[0]
-		tbl.AddRow(server.Name, gpu.Name, gpu.Index, gpu.FreeMemory, gpu.UsedMemory, gpu.TotalMemory)
-		for _, gpu := range server.Devices[1:] {
-			tbl.AddRow("", gpu.Name, gpu.Index, gpu.FreeMemory, gpu.UsedMemory, gpu.TotalMemory)
+		serverName := server.Name
+		for _, gpu := range server.Devices {
+			tbl.AddRow(serverName, gpu.Name, gpu.Index, AlignRight(gpu.FreeMemory), AlignRight(gpu.UsedMemory), AlignRight(gpu.TotalMemory))
+			serverName = ""
 		}
 	}
 
@@ -162,4 +158,8 @@ func ProcessGPUInfo(info <-chan Server) []Server {
 	}
 
 	return serverInfo
+}
+
+func AlignRight(s string) string {
+	return fmt.Sprintf("%10s", s)
 }
