@@ -9,6 +9,7 @@ func main() {
 
 	// Get remote servers.
 	servers, _ := GetRemoteServers()
+
 	info := make(chan Server, len(servers))
 
 	// Get info from remote servers.

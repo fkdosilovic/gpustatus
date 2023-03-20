@@ -19,7 +19,7 @@ Options:
     -free	Show free GPUs.
     -used	Show used GPUs.
 	
-Example:
+Examples:
     To show all servers and GPUs run:
     gpuinfo
 
@@ -35,7 +35,8 @@ func ParseArguments() Arguments {
 	var args Arguments
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, usage, os.Args[0])
+		fmt.Fprintf(flag.CommandLine.Output(), usage, os.Args[0])
+		// flag.PrintDefaults()
 	}
 
 	flag.BoolVar(&args.ShowFree, "free", false, "Show free GPUs.")
