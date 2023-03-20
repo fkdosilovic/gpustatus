@@ -1,1 +1,1 @@
-go build -o gpuinfo main.go
+go build -o gpuinfo .
