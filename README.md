@@ -21,8 +21,8 @@ bash ./build.sh
 bash ./install.sh
 ```
 
+Run `gpuinfo --help` to see all available options.
+
 ## To Do
 
-- [ ] Use different color for free GPUs and GPUs in use
-- [ ] Add an option to show only free GPUs
 - [ ] Add an option to sort by different criteria
