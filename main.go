@@ -65,10 +65,10 @@ func CreateOutput(servers []Server) table.Table {
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, server := range servers {
-		serverName := server.Name
+		name := server.Name
 		for _, gpu := range server.Devices {
-			tbl.AddRow(serverName, gpu.Name, gpu.Index, AlignRight(gpu.FreeMemory), AlignRight(gpu.UsedMemory), AlignRight(gpu.TotalMemory))
-			serverName = ""
+			tbl.AddRow(name, gpu.Name, gpu.Index, AlignRight(gpu.FreeMemory), AlignRight(gpu.UsedMemory), AlignRight(gpu.TotalMemory))
+			name = ""
 		}
 	}
 

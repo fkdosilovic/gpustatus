@@ -3,25 +3,29 @@
 A simple CLI for getting information about GPUs from you servers listed
 in SSH config (`.ssh/config`).
 
+**Note**: Currently, only NVIDIA GPUs are supported.
+
 **Example output:**
 
 ![Example output](gpuinfo-example-output.png)
 
 ## Installation
 
+You should have Go installed on your system. If you don't have it, you can
+install it from [here](https://golang.org/doc/install).
+
+Recommended way of installing `gpuinfo` is to use the official `build` and
+`install` scripts:
+
 ```bash
 git clone https://github.com/fkdosilovic/gpuinfo.git
 cd gpuinfo
-go build -o gpuinfo main.go
+bash ./build.sh
+bash ./install.sh
 ```
 
-You can add the compiled binary to your `$HOME/.local/bin` or just run it from
-the directory where you cloned the repo.
+## To Do
 
-## ToDo
-
-- [ ] Use different for free GPUs and GPUs in use
+- [ ] Use different color for free GPUs and GPUs in use
 - [ ] Add an option to show only free GPUs
-<!-- - [ ]: Add an option to show only GPUs in use -->
 - [ ] Add an option to sort by different criteria
-<!-- - [ ]: Add an option to show only GPUs with a certain amount of memory -->
