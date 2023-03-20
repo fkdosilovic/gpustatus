@@ -1,7 +1,6 @@
 # gpuinfo
 
-A simple CLI for getting information about GPUs from you servers listed
-in SSH config (`.ssh/config`).
+A simple CLI for getting information about GPUs from servers listed in SSH config (`.ssh/config`).
 
 **Note**: Currently, only NVIDIA GPUs are supported.
 
@@ -11,11 +10,9 @@ in SSH config (`.ssh/config`).
 
 ## Installation
 
-You should have Go installed on your system. If you don't have it, you can
-install it from [here](https://golang.org/doc/install).
+You should have Go installed on your system. If you don't have it, you can install it from [here](https://golang.org/doc/install).
 
-Recommended way of installing `gpuinfo` is to use the official `build` and
-`install` scripts:
+Recommended way of installing `gpuinfo` is to use the official `build` and `install` scripts:
 
 ```bash
 git clone https://github.com/fkdosilovic/gpuinfo.git
