@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"io"
 	"os"
 	"strings"
 )
@@ -12,19 +14,19 @@ type Server struct {
 	Devices []GPU
 }
 
-func GetRemoteServers() ([]string, error) {
-	filename := os.Getenv("HOME") + "/.ssh/config"
-
-	// Open the SSH config file.
-	file, err := os.Open(filename)
+func ReadDefaultSSHConfig() (io.Reader, error) {
+	read, err := os.ReadFile(os.Getenv("HOME") + "/.ssh/config")
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
+	return bytes.NewReader(read), nil
+}
+
+func GetRemoteServers(sshConfigReader io.Reader) ([]string, error) {
 	// Read the hosts.
 	var hosts []string
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(sshConfigReader)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if strings.HasPrefix(line, "Host ") {

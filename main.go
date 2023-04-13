@@ -1,14 +1,21 @@
 package main
 
 import (
+	"log"
 	"sort"
 )
 
 func main() {
 	args := ParseArguments()
 
+	// Read SSH config.
+	sshConfigReader, err := ReadDefaultSSHConfig()
+	if err != nil {
+		log.Fatalf("Failed to read SSH config: %v", err)
+	}
+
 	// Get remote servers.
-	servers, _ := GetRemoteServers()
+	servers, _ := GetRemoteServers(sshConfigReader)
 
 	info := make(chan Server, len(servers))
 
