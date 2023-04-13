@@ -10,7 +10,6 @@ import (
 
 type Server struct {
 	Name    string
-	Result  string
 	Devices []GPU
 }
 
@@ -23,7 +22,7 @@ func ReadDefaultSSHConfig() (io.Reader, error) {
 	return bytes.NewReader(read), nil
 }
 
-func GetRemoteServers(sshConfigReader io.Reader) ([]string, error) {
+func GetHosts(sshConfigReader io.Reader) ([]string, error) {
 	// Read the hosts.
 	var hosts []string
 	scanner := bufio.NewScanner(sshConfigReader)
@@ -39,4 +38,18 @@ func GetRemoteServers(sshConfigReader io.Reader) ([]string, error) {
 	}
 
 	return hosts, nil
+}
+
+func GetServers(info map[string]string) []Server {
+	var servers []Server
+
+	for host, gpuInfo := range info {
+		server := Server{
+			Name:    host,
+			Devices: ExtractGPUInfo(strings.TrimSpace(gpuInfo)),
+		}
+		servers = append(servers, server)
+	}
+
+	return servers
 }

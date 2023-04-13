@@ -28,35 +28,44 @@ var COMMAND string = fmt.Sprintf("%s --query-gpu=%s --format=%s", BASE_COMMAND, 
 const FREE_MEMORY_PERCENTAGE = 0.05
 
 // Get info from remote servers.
-func GetGPUInfoFromServers(servers []string, info chan Server) {
+func GetGPUInfoFromHosts(hosts []string) map[string]string {
 	var wg sync.WaitGroup
+	var m sync.Map
 
-	wg.Add(len(servers))
-	for _, server := range servers {
-		go GetGPUInfo(server, COMMAND, info, &wg)
+	wg.Add(len(hosts))
+	for _, host := range hosts {
+		go GetGPUInfo(host, COMMAND, &m, &wg)
 	}
 	wg.Wait()
+
+	var info = make(map[string]string)
+	m.Range(func(key, value interface{}) bool {
+		info[key.(string)] = value.(string)
+		return true
+	})
+
+	return info
 }
 
 // Run command on remote machine and return the output.
-func GetGPUInfo(server string, command string, info chan Server, wg *sync.WaitGroup) {
+func GetGPUInfo(host string, command string, m *sync.Map, wg *sync.WaitGroup) {
 	defer wg.Done()
-	cmd := exec.Command("ssh", server, command)
+	cmd := exec.Command("ssh", host, command)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
-		info <- Server{Name: server, Result: ""}
+		m.Store(host, "")
 		return
 	}
 
-	info <- Server{Name: server, Result: out.String()}
+	m.Store(host, out.String())
 }
 
-func ExtractGPUInfo(info string) []GPU {
+func ExtractGPUInfo(gpuInfo string) []GPU {
 	var devices []GPU
 
-	lines := strings.Split(info, "\n")
+	lines := strings.Split(gpuInfo, "\n")
 	for _, ln := range lines[1:] {
 		fields := strings.Split(ln, ",")
 		devices = append(devices, GPU{
@@ -69,19 +78,6 @@ func ExtractGPUInfo(info string) []GPU {
 	}
 
 	return devices
-}
-
-// Process info from remote servers.
-func ProcessGPUInfo(info <-chan Server) []Server {
-	var serverInfo []Server
-
-	for len(info) > 0 {
-		server := <-info
-		server.Devices = ExtractGPUInfo(strings.TrimSpace(server.Result))
-		serverInfo = append(serverInfo, server)
-	}
-
-	return serverInfo
 }
 
 func CheckIsGPUFree(gpu GPU) bool {

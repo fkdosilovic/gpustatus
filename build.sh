@@ -1,1 +1,1 @@
-go build -o gpuinfo .
+go build -ldflags "-s -w" -o gpuinfo .

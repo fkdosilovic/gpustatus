@@ -14,30 +14,28 @@ func main() {
 		log.Fatalf("Failed to read SSH config: %v", err)
 	}
 
-	// Get remote servers.
-	servers, _ := GetRemoteServers(sshConfigReader)
+	// Get remote hosts.
+	hosts, _ := GetHosts(sshConfigReader)
 
-	info := make(chan Server, len(servers))
+	// Get info from remote hosts.
+	info := GetGPUInfoFromHosts(hosts)
 
-	// Get info from remote servers.
-	GetGPUInfoFromServers(servers, info)
-
-	// Extract info from remote servers.
-	serverInfo := ProcessGPUInfo(info)
+	// Extract info from the query result.
+	servers := GetServers(info)
 
 	// Filter GPUs.
 	if args.ShowFree {
-		serverInfo = FilterFreeGPUs(serverInfo)
+		servers = FilterFreeGPUs(servers)
 	} else if args.ShowUsed {
-		serverInfo = FilterUsedGPUs(serverInfo)
+		servers = FilterUsedGPUs(servers)
 	}
 
 	// Sort by server name.
-	sort.Slice(serverInfo, func(i, j int) bool {
-		return serverInfo[i].Name < serverInfo[j].Name
+	sort.Slice(servers, func(i, j int) bool {
+		return servers[i].Name < servers[j].Name
 	})
 
 	// Print info.
-	tbl := CreateOutput(serverInfo)
+	tbl := CreateOutput(servers)
 	tbl.Print()
 }
