@@ -50,7 +50,7 @@ func GetGPUInfoFromHosts(hosts []string) map[string]string {
 // Run command on remote machine and return the output.
 func GetGPUInfo(host string, command string, m *sync.Map, wg *sync.WaitGroup) {
 	defer wg.Done()
-	cmd := exec.Command("ssh", host, command)
+	cmd := exec.Command("ssh", "-o ConnectTimeout=2", host, command)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
