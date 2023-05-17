@@ -1,4 +1,4 @@
-# gpuinfo
+# gpustatus
 
 A simple CLI for getting information about GPUs from servers listed in SSH config (`.ssh/config`).
 
@@ -6,22 +6,22 @@ A simple CLI for getting information about GPUs from servers listed in SSH confi
 
 **Example output:**
 
-![Example output](gpuinfo-example-output.png)
+![Example output](gpustatus-example-output.png)
 
 ## Installation
 
 You should have Go installed on your system. If you don't have it, you can install it from [here](https://golang.org/doc/install).
 
-Recommended way of installing `gpuinfo` is to use the official `build` and `install` scripts:
+Recommended way of installing `gpustatus` is to use the official `build` and `install` scripts:
 
 ```bash
-git clone https://github.com/fkdosilovic/gpuinfo.git
-cd gpuinfo
+git clone https://github.com/fkdosilovic/gpustatus.git
+cd gpustatus
 bash ./build.sh
 bash ./install.sh
 ```
 
-Run `gpuinfo --help` to see all available options.
+Run `gpustatus --help` to see all available options.
 
 ## To Do
 

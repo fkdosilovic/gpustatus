@@ -1,1 +1,1 @@
-mv gpuinfo $HOME/.local/bin/gpuinfo
+mv gpustatus $HOME/.local/bin/gpustatus

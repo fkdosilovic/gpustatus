@@ -1,4 +1,4 @@
-module github.com/fkdosilovic/gpuinfo
+module github.com/fkdosilovic/gpustatus
 
 go 1.20
 
