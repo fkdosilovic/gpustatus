@@ -21,13 +21,13 @@ Options:
 	
 Examples:
     To show all servers and GPUs run:
-    %s
+    %[1]s
 
     To show only free GPUs run:
-    %s -free
+    %[1]s -free
 
     To show only used GPUs run:
-    %s -used
+    %[1]s -used
 `
 
 func ParseArguments() Arguments {
