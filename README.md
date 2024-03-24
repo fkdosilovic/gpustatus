@@ -25,3 +25,4 @@ Run `gpustatus --help` to see all available options.
 ## To Do
 
 - [ ] Add an option to sort by different criteria
+- [ ] Add different output options (json, csv)

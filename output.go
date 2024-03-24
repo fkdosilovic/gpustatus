@@ -43,5 +43,5 @@ func GetMemoryInMB(s string) (int, error) {
 		return gib * 1024, err
 	}
 
-	return 0, fmt.Errorf("Unknown memory format: %s", s)
+	return 0, fmt.Errorf("unknown memory format: %s", s)
 }
