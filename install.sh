@@ -1,1 +1,0 @@
-mv gpustatus $HOME/.local/bin/gpustatus
